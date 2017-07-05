@@ -1,0 +1,25 @@
+	<!--- <div class="google-docs-xblock-wrapper" data-display-name="{{self.display_name}}" data-alt-text="{{self.alt_text}}">
+	    <input type="hidden" class="load_event_complete">
+	    {{ self.embed_code|safe }}
+	</div>
+	--->
+<h2>{{ title }}</h2>
+<div class="excel-xblock-wrapper">
+        <div class="google-docs-xblock-wrapper">
+                <h3> <b> <label class="google docs"> Your SpreadSheet </lable> </b> </h3>
+                <input type="hidden" class="load_event_complete"> {{ emb_code|safe }} </input>
+	</div>
+        <div class="user-input-wrapper">
+                <h3> <b> <label class="user_input_lable"> Simple Answer </lable> </b> </h3> 
+                <textarea class="user_input_text" name="student_answer" rows="4" cols="50"> {{ answer }} </textarea>
+        </div>
+        <div class="link-spreadsheet-wrapper">
+                <h3> <b> <label class="link_to_spreadsheet_lable"> link spreadsheet to work on before submitting </label></b></h3>
+                <textarea class="link_to_spreadsheet_url" rows="1"> {{ emd_code }} </textarea>
+        </div>
+        <div class="xblock-actions">
+                <button class="submission">
+                        submit
+                </button>
+        </div>
+</div>
