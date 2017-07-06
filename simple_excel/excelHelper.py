@@ -16,6 +16,7 @@ from oauth2client import tools
 from oauth2client.file import Storage
 
 
+from oauth2client.service_account import ServiceAccountCredentials
 
 #try:
 
@@ -62,7 +63,7 @@ def get_credentials():
     """
     SCOPES = 'https://www.googleapis.com/auth/drive'
 
-    CLIENT_SECRET_FILE = '/edx/app/edxapp/src/xblock-simple-excel/simple_excel/client_secret.json'
+    CLIENT_SECRET_FILE = 'client_secret.json'
 
     APPLICATION_NAME = 'Drive API Python Quickstart'
 
@@ -101,12 +102,22 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
 
     return credentials
+def get_credentials_web_service():
+
+    SCOPES = ['https://www.googleapis.com/auth/drive']
+
+    CLIENT_SECRET_FILE = '/edx/app/edxapp/google/MOOC-fb91d4f340e0.json'
+    APPLICATION_NAME = 'Drive API Python Quickstart'
+
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(CLIENT_SECRET_FILE, scopes=SCOPES)
+    #http_auth = credentials.authorize(httplib2.Http())
+    return credentials
 
 def getSheetService():
     discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
 
                     'version=v4')
-    credentials = get_credentials()
+    credentials = get_credentials_web_service()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('sheets', 'v4', http=http, discoveryServiceUrl=discoveryUrl)
     return service
