@@ -15,7 +15,7 @@ from xblock.fields import Scope
 from xblock.fragment import Fragment
 from xblockutils.studio_editable import StudioEditableXBlockMixin
 import logging
-from .excelHelper import *
+import excelHelper
 import pkg_resources
 template_engine = jinja2.Environment(loader=jinja2.PackageLoader('simple_excel'))
 
@@ -32,18 +32,18 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, XBlock):
     """
 
     display_name = String (
-        display_name = _('Title'),
+        display_name = _('Problem'),
         help = _("Put the title of the problem here"),
         scope = Scope.settings,
         default = "Excel Mentoring"
         )
     
 
-    embedded_code = String (
-        display_name = _("embedded code of the google sheets"),
-        help = _("Please publish the google sheet then copy the embedded code here"),
+    spreadsheetId = String (
+        display_name = _("ID of google sheets"),
+        help = _("Example with this url [https://docs.google.com/spreadsheets/d/17ERkDVfRdC-FjY1mxR3dSlZL2XInqlU9LQxKVsJkiMo/edit#gid=0] the spreadsheetId is 17ERkDVfRdC-FjY1mxR3dSlZL2XInqlU9LQxKVsJkiMo, please paste it in this field"),
         scope = Scope.settings,
-        default = "https://docs.google.com/spreadsheets/d/1QdcKKun8hp1wHY8CrXWJav3b7Wi6m__mv5C38NPQkxE/pubhtml?widget=true&amp;headers=false"
+        default = "https://docs.google.com/spreadsheets/d/17ERkDVfRdC-FjY1mxR3dSlZL2XInqlU9LQxKVsJkiMo/pubhtml?gid=2020115585&amp;single=true&amp;widget=true&amp;headers=false"
         )
 
     student_input = String (
@@ -58,16 +58,17 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, XBlock):
 	scope = Scope.settings,
 	default = ""
 	)
-    googlesheet_link = String (
-	display_name = _("Google Sheet Link"),
-	help = _("Student can work directly here"),
-	scope = Scope.user_state,
-	default = ""
-	)
     
-    editable_fields = ( "display_name", "embedded_code", "teacher_hint")
+    editable_fields = ( "display_name", "spreadsheetId", "teacher_hint")
     has_score = True
 
+    def getFormalHttp(self, spreadsheetId, sheetId):
+	if sheetId is not None:
+		text = "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/pubhtml?" + "gid=" + sheetId + "&amp;" + "single=true&amp;" + "widget=true&amp;headers=false"
+	else:
+		text = "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/pubhtml?" + "widget=true&amp;headers=false"
+
+	return text
     def getUrl(self, url):
 	"""
 	<iframe
@@ -79,6 +80,8 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, XBlock):
     	mozallowfullscreen="true"
     	webkitallowfullscreen="true">
 	</iframe>
+	https://docs.google.com/spreadsheets/d/17ERkDVfRdC-FjY1mxR3dSlZL2XInqlU9LQxKVsJkiMo/pubhtml?gid=2020115585&amp;single=true&amp;widget=t	       rue&amp;headers=false
+	https://docs.google.com/spreadsheets/d/17ERkDVfRdC-FjY1mxR3dSlZL2XInqlU9LQxKVsJkiMo/pubhtml?widget=true&amp;headers=false
 	"""
 
 	url = '<iframe src=' + '"' + url + '"' ' frameborder="0"' + ' width="960"' + ' height="569"' + ' allowfullscreen="true"' + ' mozallowfullscreen="true"' + ' webkitallowfullscreen="true"' + '> </iframe>'  
@@ -89,13 +92,14 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, XBlock):
         Implementing the view of student
 
         """
-	sheets = getSheetService()
+	sheets = excelHelper.getSheetService()
+	temp = "2020115585"
+	http = getFormalHttp( self.spreadsheetId, temp)
+	emb_code = getUrl(http)
         self.runtime.service(self, 'i18n')
-	url = self.getUrl(self.embedded_code)
         context["title"] = self.display_name
-        context["emb_code"] = url
+        context["emb_code"] = emb_code
         context["answer"] = self.student_input
-	context["googlesheet_link"] = self.googlesheet_link
         template = template_engine.get_template('student_view.html')
         html = template.render(context)
         frag = Fragment(html)

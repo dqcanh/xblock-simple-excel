@@ -17,15 +17,15 @@ from oauth2client.file import Storage
 
 
 
-try:
+#try:
 
-    import argparse
+#    import argparse
 
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+#    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
 
-except ImportError:
+#except ImportError:
 
-    flags = None
+#    flags = None
 
 
 
@@ -33,11 +33,11 @@ except ImportError:
 
 # at ~/.credentials/drive-python-quickstart.json
 
-SCOPES = 'https://www.googleapis.com/auth/drive'
+#SCOPES = 'https://www.googleapis.com/auth/drive'
 
-CLIENT_SECRET_FILE = 'client_secret.json'
+#CLIENT_SECRET_FILE = 'client_secret.json'
 
-APPLICATION_NAME = 'Drive API Python Quickstart'
+#APPLICATION_NAME = 'Drive API Python Quickstart'
 
 
 
@@ -60,6 +60,11 @@ def get_credentials():
         Credentials, the obtained credential.
 
     """
+    SCOPES = 'https://www.googleapis.com/auth/drive'
+
+    CLIENT_SECRET_FILE = '/edx/app/edxapp/src/xblock-simple-excel/simple_excel/client_secret.json'
+
+    APPLICATION_NAME = 'Drive API Python Quickstart'
 
     home_dir = os.path.expanduser('~')
 
@@ -85,19 +90,19 @@ def get_credentials():
 
         flow.user_agent = APPLICATION_NAME
 
-        if flags:
+        #if flags:
 
-            credentials = tools.run_flow(flow, store, flags)
+        credentials = tools.run_flow(flow, store)
 
-        else: # Needed only for compatibility with Python 2.6
+        #else: # Needed only for compatibility with Python 2.6
 
-            credentials = tools.run(flow, store)
+        #credentials = tools.run(flow, store)
 
         print('Storing credentials to ' + credential_path)
 
     return credentials
 
-def getSheetService(self):
+def getSheetService():
     discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
 
                     'version=v4')
