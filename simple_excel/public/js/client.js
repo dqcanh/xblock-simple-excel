@@ -1,7 +1,21 @@
-function SimpleExcelXBlock(runtime, element) {
+function SimpleExcelXBlock(runtime, xblockElement) {
     debugger;
+    function handleSubmissionResult(results) {
+	console.log('handleSubmissionResult INVOKED');
+    	$(xblockElement).find('div[name=attempt-number]').text(results['attempt_number']);
+    	$(xblockElement).find('div[name=problem-progress]').text(results['point_string']);
+    	$(xblockElement).find('input[name=submit-button]').val("Submit")
+    	if (results['submit_disabled'] == 'disabled') {
+    		$(xblockElement).find('input[name=submit-button]').attr('disabled','disabled');
+    	}
+    	else
+    	{
+    		$(xblockElement).find('input[name=submit-button]').removeAttr('disabled'); 
+    	}
+    }
+    /*
     var student_submit = function(data) {
-        var handlerUrl = runtime.handlerUrl(element, 'student_submit');
+        var handlerUrl = runtime.handlerUrl(xblockElement, 'student_submit');
         runtime.notify('submit', {state: 'start', message: gettext("Submitting")});
         $.ajax({
             type: "POST",
@@ -23,8 +37,35 @@ function SimpleExcelXBlock(runtime, element) {
             runtime.notify('error', {title: gettext("Unable to update settings"), message: message});
         });
     };
-    $(element).find('.submission').bind( 'click', function(e){
-	var student_answer ={ 'student_answer' :  $(element).find('.user_input_text').val() };
-        student_submit(student_answer);
+    //$(element).find('.submission').bind( 'click', function(e){
+    //	var student_answer ={ 'student_answer' :  $(element).find('.user_input_text').val() };
+    //      student_submit(student_answer);
+    //});
+    */
+    (xblockElement).find('input[name=submit-button]').bind('click', function() {
+  		// accumulate student's answer for submission
+  		
+    	var data = {
+      		'student_answer' :  $(xblockElement).find('.user_input_text').val()
+    	};
+    	
+    	
+    	/*console.log('student_answer: ' + data['student_answer']);
+    	console.log('saved_question_template: ' + data['saved_question_template']);
+    	console.log('serialized_variables: ' + data['saved_variables']);
+    	console.log('serialized_generated_variables: ' + data['saved_generated_variables']);
+    	console.log('saved_generated_question: ' + data['saved_generated_question']);
+    	console.log('saved_answer_template: ' + data['saved_answer_template']);
+    	console.log('saved_url_image: ' + data['saved_url_image']);*/
+    	console.log('student_answer: ' + data["student_answer"]);
+    	
+        $(xblockElement).find('input[name=submit-button]').attr('disabled','disabled'); 
+        $(xblockElement).find('input[name=submit-button]').val("Submitting...")
+    	var handlerUrl = runtime.handlerUrl(xblockElement, 'student_submit');
+    	$.post(handlerUrl, JSON.stringify(data)).success(handleSubmissionResult);
+  	
     });
+
+
+
 }

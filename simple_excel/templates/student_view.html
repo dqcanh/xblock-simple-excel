@@ -4,6 +4,8 @@
 	</div>
 	--->
 <h2>{{ title }}</h2>
+<div name="attempt-number" class=".attempt-number">{{ attempt_number }}</div>
+<div name="problem-progress" class=".problem-progress">{{ point_string }}</div>
 <div class="excel-xblock-wrapper">
         <div class="google-docs-xblock-wrapper">
                 <h3> <b> <label class="google docs"> Your SpreadSheet </lable> </b> </h3>
@@ -15,11 +17,10 @@
         </div>
         <div class="link-spreadsheet-wrapper">
                 <h3> <b> <label class="link_to_spreadsheet_lable"> link spreadsheet to work on before submitting </label></b></h3>
-                <textarea class="link_to_spreadsheet_url" rows="1"> {{ emd_code }} </textarea>
+                <!--- <textarea class="link_to_spreadsheet_url" rows="1"> {{ link }} </textarea> --->
+                <a href="{{ link }}">Your Problem</a> 
         </div>
         <div class="xblock-actions">
-                <button class="submission">
-                        submit
-                </button>
+                <input type="button" class="input_main" name="submit-button" {{disabled}} value="Submit" />
         </div>
 </div>

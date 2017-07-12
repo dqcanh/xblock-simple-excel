@@ -37,5 +37,5 @@ setup(
             'simple_excel = simple_excel:SimpleExcelXBlock',
         ]
     },
-    package_data=package_data("simple_excel", ["public", "templates"]),
+    package_data=package_data("simple_excel", ["public", "templates", "migrations"]),
 )
