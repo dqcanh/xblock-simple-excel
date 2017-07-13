@@ -413,9 +413,13 @@ def processSpreadsheet2(sheets, spreadsheetId,  question_range):
 def evaluateResult(sheets, student_worksheet, solution_worksheet, answer_range):
     rangeName = 'Sheet1!' + answer_range
     response = get_raw_value_from_a_range(sheets, student_worksheet, rangeName)
-    response_student = response["values"]
+    response_student = response.get("values")
+    if response_student is None:
+	return False
     response = get_raw_value_from_a_range(sheets, solution_worksheet, rangeName)    
-    response_solution =response["values"]
+    response_solution =response.get("values")
+    if response_solution is None:
+	return False
     if  len(response_student) != len(response_solution):
 	return False
     length_row_student = 0
