@@ -154,12 +154,12 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
         """
         model_object= self.get_model_object()
         
-        if self.spreadsheetId != model_object.teacher_link:
+        if self.spreadsheetId != model_object.teacher_link or self.question_range != model_object.student_link_origin:
             model_object.teacher_link = self.spreadsheetId
             sheets = excelHelper.getSheetService()
 	    spreadsheet_workbench_id, sheet_workbench_id, newly_spreadsheet_solution_id, newly_spreadsheet_original_id = excelHelper.processSpreadsheet2(sheets, self.spreadsheetId, self.question_range)
             model_object.student_link_workbench = spreadsheet_workbench_id
-            model_object.student_link_origin = newly_spreadsheet_original_id
+            model_object.student_link_origin = self.question_range
             model_object.student_link_copy = newly_spreadsheet_solution_id
             model_object.student_sheet_id = sheet_workbench_id
             model_object.save()
