@@ -20,6 +20,7 @@ import pkg_resources
 from .models import Excel
 from submissions import api as sub_api
 from .sub_api import SubmittingXBlockMixin
+
 template_engine = jinja2.Environment(loader=jinja2.PackageLoader('simple_excel'))
 
 logger = logging.getLogger(__name__)
@@ -40,11 +41,14 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
         scope = Scope.settings,
         default = "Excel Mentoring"
         )
+
     spreadsheetId = String (
         display_name = _("ID of google sheets"),
         help = _("Given We have [https://docs.google.com/spreadsheets/d/17ERkDVfRdC-FjY1mxR3dSlZL2XInqlU9LQxKVsJkiMo/edit#gid=0] the spreadsheetId is 17ERkDVfRdC-FjY1mxR3dSlZL2XInqlU9LQxKVsJkiMo, please copy and paste it in this field"),
         scope = Scope.settings,
-        default = "1h6QvSTDKEAEi7Sx02zaf1KhE-AAVB6aOrhyeyzuIRhQ")
+        # default = "1h6QvSTDKEAEi7Sx02zaf1KhE-AAVB6aOrhyeyzuIRhQ"
+        default = "1bSoQE7PRa3EIRCypfJTHGvzWrjDIY-1U9e9jxqCCc9A"
+    )
 
     student_input = String (
         display_name = _("Student Simple Input"),
@@ -52,18 +56,21 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
         scope =Scope.user_state,
         default = ""
         )
-    teacher_hint = String (
-	display_name = _("Teacher Hint"),
-	help = _("Here is where to get the answer. For example:  Sheet1!A1:D5"),
-	scope = Scope.settings,
-	default = "A8:A9"
+
+    answer_range = String (
+	    display_name = _("Problem solver"),
+	    help = _("Provide the sheetname and cells to look for problem solver in given spreadsheets. For example:  Sheet1!A1:D5"),
+	    scope = Scope.settings,
+	    default = "Problem Answer!B13"
 	)
+
     question_range = String (
         display_name =_("Question Range"),
-        help = _("Please help to input the question range"),
+        help = _("Provide the sheetname and cells that contain the question"),
         scope = Scope.settings,
-        default = "A1:L7"
+        default = "Problem Answer!A1:L12"
         )
+
     max_attempts = Integer(
         display_name="Maximum Attempts",
         help="Defines the number of times a student can try to answer this problem.",
@@ -87,21 +94,29 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
         help="Shows submission times",
         default=True,
         scope=Scope.settings)
+
     copy_spreadsheet_id = None
     copy_sheet_id = None
-    editable_fields = ( "display_name", "spreadsheetId", "teacher_hint", "question_range", "max_attempts", "show_points_earned", "show_submission_times")
+
+    editable_fields = ( "display_name", "spreadsheetId", "answer_range", "question_range", "max_attempts", "show_points_earned", "show_submission_times")
     has_score = True
     attempt_number = 0
-    def getFormalHttp(self, spreadsheetId, sheetId):
-	if sheetId is not None:
-		text = "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/pubhtml?" + "gid=" + str(sheetId) + "&amp;" + "single=true&amp;" + "widget=true&amp;headers=false"
-	else:
-		text = "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/pubhtml?" + "widget=true&amp;headers=false"
 
-	return text
+
+    def getFormalHttp(self, spreadsheetId, sheetId):
+        if sheetId is not None:
+            text = "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/pubhtml?" + "gid=" + str(sheetId) + "&amp;" + "single=true&amp;" + "widget=true&amp;headers=false"
+        else:
+            text = "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/pubhtml?" + "widget=true&amp;headers=false"
+
+        return text
+
+
     def getWorksheetLink(self, spreadsheetId, sheetId):
         text = "https://docs.google.com/spreadsheets/d/" + spreadsheetId + "/edit#gid=" + str(sheetId)
         return text
+
+
     def getUrl(self, url):
 	"""
 	<iframe
@@ -117,12 +132,14 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
 	https://docs.google.com/spreadsheets/d/17ERkDVfRdC-FjY1mxR3dSlZL2XInqlU9LQxKVsJkiMo/pubhtml?widget=true&amp;headers=false
 	"""
 
-	url = '<iframe src=' + '"' + url + '"' ' frameborder="0"' + ' width="960"' + ' height="569"' + ' allowfullscreen="true"' + ' mozallowfullscreen="true"' + ' webkitallowfullscreen="true"' + '> </iframe>'  
-	return url
+        url = '<iframe src=' + '"' + url + '"' ' frameborder="0"' + ' width="960"' + ' height="569"' + ' allowfullscreen="true"' + ' mozallowfullscreen="true"' + ' webkitallowfullscreen="true"' + '> </iframe>'
+        return url
     
+
     def _get_course_id(self):
         """ Get a course ID if available """
         return getattr(self.runtime, 'course_id', 'all')
+
 
     def _get_student_id(self):
         """ Get student anonymous ID or normal ID """
@@ -130,6 +147,7 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
             return self.runtime.anonymous_student_id
         except AttributeError:
             return self.scope_ids.user_id
+
 
     def get_model_object(self):
         """
@@ -145,7 +163,10 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
             course_key=course_key,
         )
 
+        logger.info(u"Canhdq want to know data of excel model: {}" .format(excel_data))
+
         return excel_data
+
 
     def student_view(self, context = None):
         """
@@ -157,20 +178,24 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
         if self.spreadsheetId != model_object.teacher_link or self.question_range != model_object.student_link_origin:
             model_object.teacher_link = self.spreadsheetId
             sheets = excelHelper.getSheetService()
-	    spreadsheet_workbench_id, sheet_workbench_id, newly_spreadsheet_solution_id, newly_spreadsheet_original_id = excelHelper.processSpreadsheet2(sheets, self.spreadsheetId, self.question_range)
+            spreadsheet_workbench_id, sheet_workbench_id, newly_spreadsheet_solution_id, newly_spreadsheet_original_id = excelHelper.processSpreadsheet2(sheets, self.spreadsheetId, self.question_range, self.answer_range)
             model_object.student_link_workbench = spreadsheet_workbench_id
             model_object.student_link_origin = self.question_range
             model_object.student_link_copy = newly_spreadsheet_solution_id
             model_object.student_sheet_id = sheet_workbench_id
             model_object.save()
+
         self.copy_spreadsheet_id = model_object.student_link_workbench
         self.copy_sheet_id = model_object.student_sheet_id
+
         logger.info(_(u"Tammd want to know copy_spreadsheet_id: %s"), self.copy_spreadsheet_id)
         logger.info(_(u"Tammd want to know solution_spreadsheet_id: %s"), model_object.student_link_copy)
-	http = self.getFormalHttp( self.copy_spreadsheet_id, self.copy_sheet_id)
-	emb_code = self.getUrl(http)
+
+        http = self.getFormalHttp( self.copy_spreadsheet_id, self.copy_sheet_id)
+        emb_code = self.getUrl(http)
         link = self.getWorksheetLink( self.copy_spreadsheet_id, self.copy_sheet_id)
         self.runtime.service(self, 'i18n')
+
         should_disabled = ''
         submissions = sub_api.get_submissions(self.student_item_key, 1)
         if submissions:
@@ -179,7 +204,8 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
             answer = latest_submission['answer'] # saved "answer information"         
             self.attempt_number = latest_submission['attempt_number']
             if (self.attempt_number >= self.max_attempts):
-                  should_disabled = 'disabled'
+                should_disabled = 'disabled'
+
         context["title"] = self.display_name
         context["emb_code"] = emb_code
         context["answer"] = self.student_input
@@ -193,6 +219,7 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
         frag = Fragment(html)
         frag.add_javascript(self.resource_string('public/js/client.js'))
         frag.initialize_js("SimpleExcelXBlock")
+
         return frag
 
 
@@ -205,10 +232,22 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
         """""
         super(SimpleExcelXBlock, self).validate_field_data(validation, data)
 
+
     @XBlock.json_handler
     def student_submit(self, submissions, suffix=''):
+        """
+        Handle problem grading submission
+
+        :param self:
+        :param submissions:
+        :param suffix:
+        :return: submit_result
+
+        """
+
 	logger.info(_(u"Tammd want to know json data: %s"), submissions['student_answer'])
         logger.info(u'Received submissions: {}'.format(submissions))
+
         model_object= self.get_model_object()
 
         submission_data = {
@@ -218,11 +257,20 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
             'student_sheet_id' : str(model_object.student_sheet_id),
         }
         submission = sub_api.create_submission(self.student_item_key, submission_data)
+
+        # logger.info(u'Canhdq want to know values of newly created submission: {}'.format(submission))
+
         points_earned = 0
+
+        # get final grading result
         sheets = excelHelper.getSheetService()
-        evaluation_result = excelHelper.evaluateResult(sheets, model_object.student_link_workbench, model_object.student_link_copy, self.teacher_hint)
+        evaluation_result = excelHelper.evaluateResult(sheets, model_object.student_link_workbench, model_object.student_link_copy, self.answer_range)
+
+        logger.info(u"Canhdq want to know evaluation_result: %s", evaluation_result)
+
         if evaluation_result == True:
             points_earned = self.max_points
+
         sub_api.set_score(submission['uuid'], points_earned, self.max_points)
         
         submit_result = {}
@@ -231,10 +279,13 @@ class SimpleExcelXBlock(StudioEditableXBlockMixin, SubmittingXBlockMixin, XBlock
         # disable the "Submit" button once the submission attempts reach max_attemps value
         self.attempt_number = submission['attempt_number']
         submit_result['attempt_number'] = self.attempt_number_string
+
         if (self.attempt_number >= self.max_attempts):
             submit_result['submit_disabled'] = 'disabled'
         else:
             submit_result['submit_disabled'] = ''
+
+        logger.info(u"Canhdq want to know JSON data of submit_result: {}".format(submit_result))
 
         return submit_result
         #return {'result': 'success' }

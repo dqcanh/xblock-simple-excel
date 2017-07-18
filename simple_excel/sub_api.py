@@ -32,11 +32,13 @@ class SubmittingXBlockMixin(object):
     @property
     def student_item_key(self):
         """ Get the student_item_dict required for the submissions API """
+
         assert sub_api is not None
         location = self.location.replace(branch=None, version=None)  # Standardize the key in case it isn't already
+
         return dict(
-            student_id=self.runtime.anonymous_student_id,
-            course_id=unicode(location.course_key),
-            item_id=unicode(location),
-            item_type=self.scope_ids.block_type,
+            student_id  = self.runtime.anonymous_student_id,
+            course_id   = unicode(location.course_key),
+            item_id     = unicode(location),
+            item_type   = self.scope_ids.block_type,
         )
